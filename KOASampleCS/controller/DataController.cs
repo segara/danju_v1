@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,12 +19,13 @@ namespace sunsin.controller
         public event EventHandler<StockEventArgs> OnReceiveRealDataHandler;
         StockItemElementMgr stockItemElementMgr;
         public List<double> exceptList;
-
+        public Hashtable codeNameHashTable;
         public DataController()
         {
-            MyStockItem myStockItem = new MyStockItem();
+            myStockItem = new MyStockItem();
             stockItemElementMgr = StockItemElementMgr.GetInstance();
             exceptList = new List<double>();
+            codeNameHashTable = new Hashtable();
         }
 
         public void SetOpenAPI(AxKHOpenAPI _axKHOpenAPI)
@@ -83,7 +85,7 @@ namespace sunsin.controller
                 }
                 else
                 {
-                    SavedStockItem savedStockItme = new SavedStockItem(axKHOpenAPI.GetMasterCodeName(e.sRealKey), gapPercentage, gapPrice, curPrice, conclusionVolume);
+                    SavedStockItem savedStockItme = new SavedStockItem(e.sRealKey.Trim().Replace("A",""), axKHOpenAPI.GetMasterCodeName(e.sRealKey), gapPercentage, gapPrice, curPrice, conclusionVolume);
                     myStockItem.myStockItemDic.Add(e.sRealKey, savedStockItme);
                 }
 

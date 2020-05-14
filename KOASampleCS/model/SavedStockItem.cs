@@ -16,6 +16,7 @@ namespace KOASampleCS.model
     }
     public class SavedStockItem
     {
+        public string itemCode;
         public string itemName;
         public double gapPercentage;
         public int gapPrice;
@@ -27,8 +28,9 @@ namespace KOASampleCS.model
         public double allDanjuCnt; 
         public double allTradeMoney; //총거래금
 
-        public SavedStockItem(string _itemName, double _gapPercentage, int _gapPrice, double _curPrice, double _curVolume)
+        public SavedStockItem(string _itemCode, string _itemName, double _gapPercentage, int _gapPrice, double _curPrice, double _curVolume)
         {
+            this.itemCode = _itemCode;
             this.itemName = _itemName;
             this.gapPercentage = _gapPercentage;
             this.gapPrice = _gapPrice;

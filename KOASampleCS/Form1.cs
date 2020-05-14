@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AxKHOpenAPILib;
 using KiwoomCode;
 using KOASampleCS.model;
 using sunsin;
@@ -72,11 +73,30 @@ namespace KOASampleCS
             dataController = new DataController();
             dataController.SetOpenAPI(axKHOpenAPI);
             dataController.OnReceiveRealDataHandler += MyStockItemGridView;
+            axKHOpenAPI.OnEventConnect += API_OnEventConnect; //로그인
             stockItemElementMgr.OnReceiveStockOddHandler += OnReceiveSelectedStockItemEvent;
             stockItemElementMgr.OnReceiveStockOddColoringHandler += OnReceiveSelectedStockItemColoringEvent;
         }
 
-       
+        private void API_OnEventConnect(object sender, _DKHOpenAPIEvents_OnEventConnectEvent e)
+        {
+            string codeList = axKHOpenAPI.GetCodeListByMarket("10");
+            string[] codeArray = codeList.Split(';');
+            AutoCompleteStringCollection collection = new AutoCompleteStringCollection();
+
+            foreach (string code in codeArray)
+            {
+                string name = axKHOpenAPI.GetMasterCodeName(code);
+                if (dataController.codeNameHashTable.ContainsKey(name) == false)
+                {
+                    dataController.codeNameHashTable.Add(name, code);
+                    collection.Add(name);
+                }
+                    
+            }
+
+            favoriteItemCodeTxt.AutoCompleteCustomSource = collection;
+        }
 
         private void MyStockItemGridView(object sender, StockEventArgs e)
         {
@@ -91,12 +111,12 @@ namespace KOASampleCS
                 {
                     this.savedStockDataGridView.Rows.Add();
                 }
-                this.savedStockDataGridView.Rows[idx].Cells[0].Value = idx + 1;
-                this.savedStockDataGridView.Rows[idx].Cells[0].Value = savedStockItem.Value.itemName;
-                this.savedStockDataGridView.Rows[idx].Cells[0].Value = savedStockItem.Value.curPrice;
-                this.savedStockDataGridView.Rows[idx].Cells[0].Value = savedStockItem.Value.gapPercentage;
-                this.savedStockDataGridView.Rows[idx].Cells[0].Value = savedStockItem.Value.gapPrice;
-                this.savedStockDataGridView.Rows[idx].Cells[0].Value = savedStockItem.Value.curVolume;
+                this.savedStockDataGridView.Rows[idx].Cells[0].Value = savedStockItem.Value.itemCode;
+                this.savedStockDataGridView.Rows[idx].Cells[1].Value = savedStockItem.Value.itemName;
+                this.savedStockDataGridView.Rows[idx].Cells[2].Value = savedStockItem.Value.curPrice;
+                this.savedStockDataGridView.Rows[idx].Cells[3].Value = savedStockItem.Value.gapPercentage;
+                this.savedStockDataGridView.Rows[idx].Cells[4].Value = savedStockItem.Value.gapPrice;
+                this.savedStockDataGridView.Rows[idx].Cells[5].Value = savedStockItem.Value.curVolume;
 
                 idx++;
 
@@ -705,9 +725,11 @@ namespace KOASampleCS
         {
          
                 long lRet;
-
-                lRet = axKHOpenAPI.SetRealReg(GetScrNum(),            
-                                                favoriteItemCodeTxt.Text,    
+                if (dataController.codeNameHashTable.ContainsKey((object)favoriteItemCodeTxt.Text) == false)
+                    return;
+                string itemCode = dataController.codeNameHashTable[(object)favoriteItemCodeTxt.Text].ToString();
+                lRet = axKHOpenAPI.SetRealReg(GetScrNum(),
+                                               itemCode,    
                                                 "9001;10",  // FID번호
                                                 "0");       // 0 : 마지막에 등록한 종목만 실시간
 
@@ -726,18 +748,17 @@ namespace KOASampleCS
         {
             if(e.RowIndex >= 0)
             {
-                if(e.ColumnIndex == 7)
-                {
+               
                     string itemCode = savedStockDataGridView.Rows[e.RowIndex].Cells[0].Value.ToString();
                     if(e.Button == MouseButtons.Left)
                     {
-                        if(this.danjuItemName.Text.Equals(axKHOpenAPI.GetMasterCodeName(itemCode)))
-                        {
+                        //if(this.danjuItemName.Text.Equals(axKHOpenAPI.GetMasterCodeName(itemCode)))
+                        //{
                             this.danjuItemName.Text = axKHOpenAPI.GetMasterCodeName(itemCode);
                             stockItemElementMgr.selectedStockCode = itemCode;
                             SetStockOddLotGridView(itemCode);
                             this.CurSelectItemCode = itemCode;
-                        }
+                        //}
                     }
                     else if(e.Button == MouseButtons.Right)
                     {
@@ -747,7 +768,7 @@ namespace KOASampleCS
                             myStockItem.myStockItemDic.Remove(itemCode);
                         }
                     }
-                }
+                
             }
         }
 
