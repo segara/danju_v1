@@ -106,12 +106,6 @@
             this.label14 = new System.Windows.Forms.Label();
             this.favoriteItemCodeTxt = new System.Windows.Forms.TextBox();
             this.danjuCheckDataGridView = new System.Windows.Forms.DataGridView();
-            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.danjuItemName = new System.Windows.Forms.Label();
             this.deleteNotDanjuBtn = new System.Windows.Forms.Button();
             this.label15 = new System.Windows.Forms.Label();
@@ -130,6 +124,12 @@
             this.exceptCheckBoxM20 = new System.Windows.Forms.CheckBox();
             this.exceptCheckBoxM10 = new System.Windows.Forms.CheckBox();
             this.danjuCombineCheckBox = new System.Windows.Forms.CheckBox();
+            this.danjuGridView_단주 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.danjuGridView_체결횟수 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.danjuGridView_합산금액 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.danjuGridView_주기 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.danjuGridView_시작시간 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.danjuGridView_종료시간 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.menuStrip.SuspendLayout();
             this.grp로그.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.axKHOpenAPI)).BeginInit();
@@ -151,7 +151,7 @@
             this.조건검색ToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1036, 24);
+            this.menuStrip.Size = new System.Drawing.Size(1464, 24);
             this.menuStrip.TabIndex = 0;
             this.menuStrip.Text = "menuStrip";
             // 
@@ -861,12 +861,12 @@
             this.danjuCheckDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.danjuCheckDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.danjuCheckDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Column6,
-            this.Column7,
-            this.Column8,
-            this.Column9,
-            this.Column10,
-            this.Column11});
+            this.danjuGridView_단주,
+            this.danjuGridView_체결횟수,
+            this.danjuGridView_합산금액,
+            this.danjuGridView_주기,
+            this.danjuGridView_시작시간,
+            this.danjuGridView_종료시간});
             this.danjuCheckDataGridView.Cursor = System.Windows.Forms.Cursors.Default;
             this.danjuCheckDataGridView.Location = new System.Drawing.Point(508, 475);
             this.danjuCheckDataGridView.Name = "danjuCheckDataGridView";
@@ -875,48 +875,6 @@
             this.danjuCheckDataGridView.RowTemplate.Height = 23;
             this.danjuCheckDataGridView.Size = new System.Drawing.Size(551, 150);
             this.danjuCheckDataGridView.TabIndex = 31;
-            // 
-            // Column6
-            // 
-            this.Column6.HeaderText = "단주";
-            this.Column6.MinimumWidth = 10;
-            this.Column6.Name = "Column6";
-            this.Column6.ReadOnly = true;
-            // 
-            // Column7
-            // 
-            this.Column7.HeaderText = "체결횟수";
-            this.Column7.MinimumWidth = 10;
-            this.Column7.Name = "Column7";
-            this.Column7.ReadOnly = true;
-            // 
-            // Column8
-            // 
-            this.Column8.HeaderText = "합산금액";
-            this.Column8.MinimumWidth = 10;
-            this.Column8.Name = "Column8";
-            this.Column8.ReadOnly = true;
-            // 
-            // Column9
-            // 
-            this.Column9.HeaderText = "주기";
-            this.Column9.MinimumWidth = 10;
-            this.Column9.Name = "Column9";
-            this.Column9.ReadOnly = true;
-            // 
-            // Column10
-            // 
-            this.Column10.HeaderText = "시작시간";
-            this.Column10.MinimumWidth = 10;
-            this.Column10.Name = "Column10";
-            this.Column10.ReadOnly = true;
-            // 
-            // Column11
-            // 
-            this.Column11.HeaderText = "종료시간";
-            this.Column11.MinimumWidth = 10;
-            this.Column11.Name = "Column11";
-            this.Column11.ReadOnly = true;
             // 
             // danjuItemName
             // 
@@ -1102,11 +1060,53 @@
             this.danjuCombineCheckBox.UseVisualStyleBackColor = true;
             this.danjuCombineCheckBox.CheckedChanged += new System.EventHandler(this.danjuCombineCheckBox_CheckedChanged);
             // 
+            // danjuGridView_단주
+            // 
+            this.danjuGridView_단주.HeaderText = "단주";
+            this.danjuGridView_단주.MinimumWidth = 10;
+            this.danjuGridView_단주.Name = "danjuGridView_단주";
+            this.danjuGridView_단주.ReadOnly = true;
+            // 
+            // danjuGridView_체결횟수
+            // 
+            this.danjuGridView_체결횟수.HeaderText = "체결횟수";
+            this.danjuGridView_체결횟수.MinimumWidth = 10;
+            this.danjuGridView_체결횟수.Name = "danjuGridView_체결횟수";
+            this.danjuGridView_체결횟수.ReadOnly = true;
+            // 
+            // danjuGridView_합산금액
+            // 
+            this.danjuGridView_합산금액.HeaderText = "합산금액";
+            this.danjuGridView_합산금액.MinimumWidth = 10;
+            this.danjuGridView_합산금액.Name = "danjuGridView_합산금액";
+            this.danjuGridView_합산금액.ReadOnly = true;
+            // 
+            // danjuGridView_주기
+            // 
+            this.danjuGridView_주기.HeaderText = "주기";
+            this.danjuGridView_주기.MinimumWidth = 10;
+            this.danjuGridView_주기.Name = "danjuGridView_주기";
+            this.danjuGridView_주기.ReadOnly = true;
+            // 
+            // danjuGridView_시작시간
+            // 
+            this.danjuGridView_시작시간.HeaderText = "시작시간";
+            this.danjuGridView_시작시간.MinimumWidth = 10;
+            this.danjuGridView_시작시간.Name = "danjuGridView_시작시간";
+            this.danjuGridView_시작시간.ReadOnly = true;
+            // 
+            // danjuGridView_종료시간
+            // 
+            this.danjuGridView_종료시간.HeaderText = "종료시간";
+            this.danjuGridView_종료시간.MinimumWidth = 10;
+            this.danjuGridView_종료시간.Name = "danjuGridView_종료시간";
+            this.danjuGridView_종료시간.ReadOnly = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1036, 635);
+            this.ClientSize = new System.Drawing.Size(1464, 635);
             this.Controls.Add(this.danjuCombineCheckBox);
             this.Controls.Add(this.exceptCheckBoxM100);
             this.Controls.Add(this.exceptCheckBoxM50);
@@ -1242,12 +1242,6 @@
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.TextBox favoriteItemCodeTxt;
         private System.Windows.Forms.DataGridView danjuCheckDataGridView;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column7;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column8;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column9;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column10;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column11;
         private System.Windows.Forms.Label danjuItemName;
         private System.Windows.Forms.Button allAddBtn;
         private System.Windows.Forms.Button deleteNotDanjuBtn;
@@ -1276,6 +1270,12 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
+        private System.Windows.Forms.DataGridViewTextBoxColumn danjuGridView_단주;
+        private System.Windows.Forms.DataGridViewTextBoxColumn danjuGridView_체결횟수;
+        private System.Windows.Forms.DataGridViewTextBoxColumn danjuGridView_합산금액;
+        private System.Windows.Forms.DataGridViewTextBoxColumn danjuGridView_주기;
+        private System.Windows.Forms.DataGridViewTextBoxColumn danjuGridView_시작시간;
+        private System.Windows.Forms.DataGridViewTextBoxColumn danjuGridView_종료시간;
     }
 }
 

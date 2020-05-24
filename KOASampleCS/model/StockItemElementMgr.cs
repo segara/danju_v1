@@ -11,8 +11,8 @@ namespace KOASampleCS.model
         private static StockItemElementMgr stockItemElement;
         private static object lockObject = new object();
 
-        public Dictionary<string, Dictionary<double, ConclusionInfo>> stockDictionary; //<종목코드,<거래량, 체결정보>>
-        public Dictionary<double, ConclusionInfo> conclusionDictionary; //<거래량, 체결정보>>
+        public Dictionary<string, Dictionary<double, DanjuChecker>> stockDictionary; //<종목코드,<거래량, 체결정보>>  거래량단위로 묶은것
+        //public Dictionary<double, DanjuChecker> conclusionDictionary; //<거래량, 체결정보>>
 
         public string selectedStockCode; //현재 그리드 뷰에 보여지고 있는 종목코드
 
@@ -25,17 +25,14 @@ namespace KOASampleCS.model
             {
                 if(stockItemElement == null)
                 {
-
                     stockItemElement = new StockItemElementMgr();
-
-
                 }
                 return stockItemElement;
             }
         }
         private StockItemElementMgr()
         {
-            stockDictionary = new Dictionary<string, Dictionary<double, ConclusionInfo>>();
+            stockDictionary = new Dictionary<string, Dictionary<double, DanjuChecker>>();
         }
 
         public void ThreadPoolCallBack(object data)
@@ -46,39 +43,33 @@ namespace KOASampleCS.model
 
         public void AddInfo(string itemcode, double price, double volume, int time)
         {
-            try
+           
+            lock (lockObject)
             {
-                lock (lockObject)
+                if (stockDictionary.ContainsKey(itemcode))
                 {
-                    if (stockDictionary.ContainsKey(itemcode))
+                    if (stockDictionary[itemcode].ContainsKey(volume))
                     {
-                        if (stockDictionary.ContainsKey(itemcode))
-                        {
-                            stockDictionary[itemcode][volume].AddTransaction(price, volume, time);
-                        }
-                        else
-                        {
-                            ConclusionInfo transactionInfo = new ConclusionInfo(itemcode, price, volume, time);
-                            stockDictionary[itemcode].Add(volume, transactionInfo);
-                        }
+                        stockDictionary[itemcode][volume].AddTransaction(price, volume, time);
                     }
                     else
                     {
-                        ConclusionInfo transactionInfo = new ConclusionInfo(itemcode, price, volume, time);
-                        conclusionDictionary = new Dictionary<double, ConclusionInfo>();
-                        conclusionDictionary.Add(volume, transactionInfo);
-                        stockDictionary.Add(itemcode, conclusionDictionary);
-
+                        DanjuChecker transactionInfo = new DanjuChecker(itemcode, price, volume, time);
+                        stockDictionary[itemcode].Add(volume, transactionInfo);
                     }
                 }
-            } catch (Exception e)
-            {
-                Console.WriteLine("exception : " + e);
+                else
+                {
+                    DanjuChecker transactionInfo = new DanjuChecker(itemcode, price, volume, time);
+                    Dictionary<double, DanjuChecker> conclusionDictionary = new Dictionary<double, DanjuChecker>();
+                    conclusionDictionary.Add(volume, transactionInfo);
+                    stockDictionary.Add(itemcode, conclusionDictionary);
+                }
             }
             
         }
 
-        public class ConclusionInfo
+        public class DanjuChecker
         {
             private const int DANJU_COUNT_CHECKER = 3;
             private const int TIME_GAP_MIN = 30; //second
@@ -90,11 +81,11 @@ namespace KOASampleCS.model
             private double priceSum;
             public List<int> conclusionTimeList;
 
-            public Dictionary<int, StockOddLotInfo> continuosInfoDic; //단주주기사전
+            public Dictionary<int, StockOddLotInfo> danjuCheckDic; //단주주기사전 //키:주기
             public Dictionary<int, int> continuosTempDic; //단주주기 임시사전 //키:주기 , 값:반복횟수
             private StockItemElementMgr stockItemElementMgr = StockItemElementMgr.GetInstance();
 
-            public ConclusionInfo(string _itemcode, double _price, double _volume, int _time)
+            public DanjuChecker(string _itemcode, double _price, double _volume, int _time)
             {
                 idx = 0;
                 itemCode = _itemcode;
@@ -103,7 +94,7 @@ namespace KOASampleCS.model
                 this.time = _time;
                 conclusionTimeList = new List<int>();
                 conclusionTimeList.Add(_time);
-                continuosInfoDic = new Dictionary<int, StockOddLotInfo>();
+                danjuCheckDic = new Dictionary<int, StockOddLotInfo>();
                 continuosTempDic = new Dictionary<int, int>();
                 continuosTempDic.Add(0, 1);
 
@@ -179,7 +170,7 @@ namespace KOASampleCS.model
                     }
                     else
                     {
-                        //전달받은 시차 없음, 비슷한 시차 없음
+                        //전달받은 시차 없음, 비슷한 시차 없음 -> 새로운 데이터
                         cycle = time_gap;
                         continuosTempDic.Add(cycle, 2);
                     }
@@ -210,32 +201,31 @@ namespace KOASampleCS.model
                 {
                     Console.WriteLine("단주 3회 이상 포착 : " + itemCode);
                     //처음 등록일 경우
-                    if (!continuosInfoDic.ContainsKey(cycle))
+                    if (!danjuCheckDic.ContainsKey(cycle))
                     {
-                        int firstConclusionTime = lastConclusionTimeValue - (cycle * 3); //최근체결시간 - (주기*3)
+                        int firstConclusionTime = lastConclusionTimeValue - (cycle * DANJU_COUNT_CHECKER); //최근체결시간 - (주기*3)
                         double sumPriceSumAll = priceSum * 4; //누적거래대금
                         StockOddLotInfo stockOddLotInfo = new StockOddLotInfo(continuosTempDic[cycle], lastConclusionTimeValue, firstConclusionTime, sumPriceSumAll);
-                        continuosInfoDic.Add(cycle, stockOddLotInfo);
+                        danjuCheckDic.Add(cycle, stockOddLotInfo);
                     }
                     else //추가되는 경우
                     {
-                        if(continuosInfoDic[cycle].lastConclusionTime <= beforeConclusionTimeValue)
+                        if(danjuCheckDic[cycle].lastConclusionTime <= beforeConclusionTimeValue)
                         {
-                            continuosInfoDic[cycle].repeatCnt += 1;
-                            continuosInfoDic[cycle].lastConclusionTime = lastConclusionTimeValue;
-                            continuosInfoDic[cycle].sumConclusionQnt += priceSum;
+                            danjuCheckDic[cycle].repeatCnt += 1;
+                            danjuCheckDic[cycle].lastConclusionTime = lastConclusionTimeValue;
+                            danjuCheckDic[cycle].sumConclusionQnt += priceSum;
                         }
-                        
                     }
-                    if(stockItemElement.selectedStockCode != null && stockItemElement.selectedStockCode.Equals(itemCode))
+
+                    if(stockItemElementMgr.selectedStockCode != null && stockItemElementMgr.selectedStockCode.Equals(itemCode))
                     {
                         stockItemElementMgr.OnReceiveStockOddHandler?.Invoke(this, new MonitorStockOdd(itemCode));
                     }
-                    stockItemElement.OnReceiveStockOddColoringHandler?.Invoke(this, new MonitorStockOdd(itemCode));
+                    stockItemElementMgr.OnReceiveStockOddColoringHandler?.Invoke(this, new MonitorStockOdd(itemCode));
 
                 }
             }
         }
     }
-    
 }

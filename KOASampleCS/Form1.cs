@@ -778,8 +778,6 @@ namespace KOASampleCS
         {
             try
             {
-
-           
             if(danjuCheckDataGridView.InvokeRequired)
             {
                 UpdateSelectedStockItemDelegate d = new UpdateSelectedStockItemDelegate(OnReceiveSelectedStockItemEvent);
@@ -792,12 +790,13 @@ namespace KOASampleCS
                 int dataCnt = 0;
                 double allDanjuCnt = 0;
                 double allTradeMoney = 0;
-                this.danjuCheckDataGridView.Rows.Clear();
 
-                foreach (KeyValuePair<double, StockItemElementMgr.ConclusionInfo> conclusionDic in stockItemElementMgr.stockDictionary[itemCode])
+               this.danjuCheckDataGridView.Rows.Clear();
+
+                foreach (KeyValuePair<double, StockItemElementMgr.DanjuChecker> danjuCheckerDic in stockItemElementMgr.stockDictionary[itemCode])
                 {
-                    dataCnt += conclusionDic.Value.continuosInfoDic.Count;
-                    if (this._bCombineView && conclusionDic.Value.continuosInfoDic.Count > 0)
+                    dataCnt += danjuCheckerDic.Value.danjuCheckDic.Count;
+                    if (this._bCombineView && danjuCheckerDic.Value.danjuCheckDic.Count > 0)
                     {
                         int combineCnt = 0;
                         double combineAllMoney = 0;
@@ -810,7 +809,7 @@ namespace KOASampleCS
                             this.danjuCheckDataGridView.Rows.Add();
                         }
 
-                        foreach (KeyValuePair<int, StockOddLotInfo> danjuDicItem in conclusionDic.Value.continuosInfoDic)
+                        foreach (KeyValuePair<int, StockOddLotInfo> danjuDicItem in danjuCheckerDic.Value.danjuCheckDic)
                         {
                             combineCnt += danjuDicItem.Value.repeatCnt;
                             combineAllMoney += danjuDicItem.Value.sumConclusionQnt;
@@ -829,7 +828,6 @@ namespace KOASampleCS
                             {
                                 combineEndTime = danjuDicItem.Value.lastConclusionTime;
                             }
-
                         }
 
                         int last_hour = combineEndTime / 3600;
@@ -854,27 +852,31 @@ namespace KOASampleCS
                             period_second = period_time;
                         }
 
-                        danjuCheckDataGridView.Rows[idx].Cells[0].Value = conclusionDic.Key.ToString();
-                        danjuCheckDataGridView.Rows[idx].Cells[1].Value = combineCnt.ToString();
-                        danjuCheckDataGridView.Rows[idx].Cells[1].Value = combineAllMoney.ToString();
+                        Console.WriteLine(danjuCheckerDic.Key);
+
+                        danjuCheckDataGridView["danjuGridView_단주", idx].Value = danjuCheckerDic.Key.ToString();
+                        danjuCheckDataGridView["danjuGridView_체결횟수", idx].Value = combineCnt.ToString();
+                        danjuCheckDataGridView["danjuGridView_합산금액", idx].Value = combineAllMoney.ToString();
+
                         if (period_min > 0)
                         {
-                            this.danjuCheckDataGridView.Rows[idx].Cells[3].Value = period_min + ":" + period_second;
+                            danjuCheckDataGridView["danjuGridView_주기", idx].Value = period_min + ":" + period_second;
                         }
                         else
                         {
-                            this.danjuCheckDataGridView.Rows[idx].Cells[3].Value = period_second;
+                            danjuCheckDataGridView["danjuGridView_주기", idx].Value = period_second;
                         }
-                        danjuCheckDataGridView.Rows[idx].Cells[4].Value = first_hour + ":" + first_min + ":" + first_sec;
-                        danjuCheckDataGridView.Rows[idx].Cells[5].Value = last_hour + ":" + last_min + ":" + last_sec;
 
-                        allDanjuCnt += conclusionDic.Key * combineCnt;
+                        danjuCheckDataGridView["danjuGridView_시작시간", idx].Value = first_hour + ":" + first_min + ":" + first_sec;
+                        danjuCheckDataGridView["danjuGridView_종료시간", idx].Value= last_hour + ":" + last_min + ":" + last_sec;
+
+                        allDanjuCnt += danjuCheckerDic.Key * combineCnt;
                         allTradeMoney += combineAllMoney;
                         idx++;
                     }
                     else
                     {
-                        foreach (KeyValuePair<int, StockOddLotInfo> danjuDic in conclusionDic.Value.continuosInfoDic)
+                        foreach (KeyValuePair<int, StockOddLotInfo> danjuDic in danjuCheckerDic.Value.danjuCheckDic)
                         {
                             if (this.danjuCheckDataGridView.RowCount < dataCnt)
                             {
@@ -884,13 +886,14 @@ namespace KOASampleCS
                             int last_min = (danjuDic.Value.lastConclusionTime - last_hour * 3600) / 60;
                             int last_sec = danjuDic.Value.lastConclusionTime - 3600 * last_hour - last_min * 60;
 
-                            int first_hour = danjuDic.Value.lastConclusionTime / 3600;
-                            int first_min = (danjuDic.Value.lastConclusionTime - first_hour * 3600) / 60;
-                            int first_sec = danjuDic.Value.lastConclusionTime - 3600 * first_hour - first_min * 60;
+                            int first_hour = danjuDic.Value.firstConclusionTime / 3600;
+                            int first_min = (danjuDic.Value.firstConclusionTime - first_hour * 3600) / 60;
+                            int first_sec = danjuDic.Value.firstConclusionTime - 3600 * first_hour - first_min * 60;
 
                             int period_time = danjuDic.Key; //주기시간 : 초
                             int period_min = 0;
                             int period_second = 0;
+
                             if (period_time > 60)
                             {
                                 period_min = period_time / 60;
@@ -900,22 +903,23 @@ namespace KOASampleCS
                             {
                                 period_second = period_time;
                             }
-                            danjuCheckDataGridView.Rows[idx].Cells[0].Value = conclusionDic.Key.ToString();
-                            danjuCheckDataGridView.Rows[idx].Cells[1].Value = danjuDic.Value.repeatCnt.ToString();
-                            danjuCheckDataGridView.Rows[idx].Cells[1].Value = danjuDic.Value.sumConclusionQnt.ToString();
+                            danjuCheckDataGridView["danjuGridView_단주", idx].Value = danjuCheckerDic.Key.ToString();
+                            danjuCheckDataGridView["danjuGridView_체결횟수", idx].Value = danjuDic.Value.repeatCnt.ToString();
+                            danjuCheckDataGridView["danjuGridView_합산금액", idx].Value = danjuDic.Value.sumConclusionQnt.ToString();
                             if (period_min > 0)
                             {
-                                this.danjuCheckDataGridView.Rows[idx].Cells[3].Value = period_min + ":" + period_second;
+                                danjuCheckDataGridView["danjuGridView_주기", idx].Value = period_min + ":" + period_second;
                             }
                             else
                             {
-                                this.danjuCheckDataGridView.Rows[idx].Cells[3].Value = period_second;
+                                danjuCheckDataGridView["danjuGridView_주기", idx].Value = period_second;
                             }
-                            danjuCheckDataGridView.Rows[idx].Cells[4].Value = first_hour + ":" + first_min + ":" + first_sec;
-                            danjuCheckDataGridView.Rows[idx].Cells[5].Value = last_hour + ":" + last_min + ":" + last_sec;
+                            danjuCheckDataGridView["danjuGridView_시작시간", idx].Value = first_hour + ":" + first_min + ":" + first_sec;
+                            danjuCheckDataGridView["danjuGridView_종료시간", idx].Value = last_hour + ":" + last_min + ":" + last_sec;
 
-                            allDanjuCnt += (conclusionDic.Key * danjuDic.Value.repeatCnt);
+                            allDanjuCnt += (danjuCheckerDic.Key * danjuDic.Value.repeatCnt);
                             allTradeMoney += danjuDic.Value.sumConclusionQnt;
+
                             idx++;
                         }
                     }
@@ -980,10 +984,10 @@ namespace KOASampleCS
                 double allDanjuCnt = 0;
                 double allTradeMoney = 0;
 
-                foreach(KeyValuePair<double, StockItemElementMgr.ConclusionInfo> conclusionDic in stockItemElementMgr.stockDictionary[itemCode] )
+                foreach(KeyValuePair<double, StockItemElementMgr.DanjuChecker> volume_danjucheck_dictionary in stockItemElementMgr.stockDictionary[itemCode] )
                 {
-                    dataCnt += conclusionDic.Value.continuosInfoDic.Count;
-                    if (this._bCombineView && conclusionDic.Value.continuosInfoDic.Count > 0)
+                    dataCnt += volume_danjucheck_dictionary.Value.danjuCheckDic.Count;
+                    if (this._bCombineView && volume_danjucheck_dictionary.Value.danjuCheckDic.Count > 0)
                     {
                         int combineCnt = 0;
                         double combineAllMoney = 0;
@@ -996,7 +1000,7 @@ namespace KOASampleCS
                             this.danjuCheckDataGridView.Rows.Add();
                         }
 
-                        foreach(KeyValuePair<int, StockOddLotInfo> danjuDicItem in conclusionDic.Value.continuosInfoDic)
+                        foreach(KeyValuePair<int, StockOddLotInfo> danjuDicItem in volume_danjucheck_dictionary.Value.danjuCheckDic)
                         {
                             combineCnt += danjuDicItem.Value.repeatCnt;
                             combineAllMoney += danjuDicItem.Value.sumConclusionQnt;
@@ -1040,29 +1044,29 @@ namespace KOASampleCS
                             period_second = period_time;
                         }
 
-                        danjuCheckDataGridView.Rows[idx].Cells[0].Value = conclusionDic.Key.ToString();
-                        danjuCheckDataGridView.Rows[idx].Cells[1].Value = combineCnt.ToString();
-                        danjuCheckDataGridView.Rows[idx].Cells[1].Value = combineAllMoney.ToString();
+                        danjuCheckDataGridView["danjuGridView_단주", idx].Value = volume_danjucheck_dictionary.Key.ToString();
+                        danjuCheckDataGridView["danjuGridView_체결횟수", idx].Value = combineCnt.ToString();
+                        danjuCheckDataGridView["danjuGridView_합산금액", idx].Value = combineAllMoney.ToString();
                         if (period_min > 0)
                         {
-                            this.danjuCheckDataGridView.Rows[idx].Cells[3].Value = period_min + ":" + period_second;
+                            danjuCheckDataGridView["danjuGridView_주기", idx].Value = period_min + ":" + period_second;
                         }
                         else
                         {
-                            this.danjuCheckDataGridView.Rows[idx].Cells[3].Value = period_second;
+                            danjuCheckDataGridView["danjuGridView_주기", idx].Value = period_second;
                         }
-                        danjuCheckDataGridView.Rows[idx].Cells[4].Value = first_hour + ":" + first_min + ":" + first_sec;
-                        danjuCheckDataGridView.Rows[idx].Cells[5].Value = last_hour + ":" + last_min + ":" + last_sec;
+                        danjuCheckDataGridView["danjuGridView_시작시간", idx].Value = first_hour + ":" + first_min + ":" + first_sec;
+                        danjuCheckDataGridView["danjuGridView_종료시간", idx].Value = last_hour + ":" + last_min + ":" + last_sec;
 
-                        allDanjuCnt += conclusionDic.Key * combineCnt;
+                        allDanjuCnt += volume_danjucheck_dictionary.Key * combineCnt;
                         allTradeMoney += combineAllMoney;
                         idx++;
                     }
                     else
                     {
-                        foreach (KeyValuePair<int, StockOddLotInfo> danjuDic in conclusionDic.Value.continuosInfoDic)
+                        foreach (KeyValuePair<int, StockOddLotInfo> danjuDic in volume_danjucheck_dictionary.Value.danjuCheckDic)
                         {
-                            if (this.danjuCheckDataGridView.RowCount < stockItemElementMgr.stockDictionary.Count * conclusionDic.Value.continuosInfoDic.Count)
+                            if (this.danjuCheckDataGridView.RowCount < stockItemElementMgr.stockDictionary.Count * volume_danjucheck_dictionary.Value.danjuCheckDic.Count)
                             {
                                 this.danjuCheckDataGridView.Rows.Add();
                             }
@@ -1088,21 +1092,21 @@ namespace KOASampleCS
                                 period_second = period_time;
                             }
 
-                            danjuCheckDataGridView.Rows[idx].Cells[0].Value = conclusionDic.Key.ToString();
-                            danjuCheckDataGridView.Rows[idx].Cells[1].Value = danjuDic.Value.repeatCnt.ToString();
-                            danjuCheckDataGridView.Rows[idx].Cells[1].Value = danjuDic.Value.sumConclusionQnt.ToString();
+                            danjuCheckDataGridView["danjuGridView_단주", idx].Value = volume_danjucheck_dictionary.Key.ToString();
+                            danjuCheckDataGridView["danjuGridView_체결횟수", idx].Value = danjuDic.Value.repeatCnt.ToString();
+                            danjuCheckDataGridView["danjuGridView_합산금액", idx].Value = danjuDic.Value.sumConclusionQnt.ToString();
                             if (period_min > 0)
                             {
-                                this.danjuCheckDataGridView.Rows[idx].Cells[3].Value = period_min + ":" + period_second;
+                                danjuCheckDataGridView["danjuGridView_주기", idx].Value = period_min + ":" + period_second;
                             }
                             else
                             {
-                                this.danjuCheckDataGridView.Rows[idx].Cells[3].Value = period_second;
+                                danjuCheckDataGridView["danjuGridView_주기", idx].Value = period_second;
                             }
-                            danjuCheckDataGridView.Rows[idx].Cells[4].Value = first_hour + ":" + first_min + ":" + first_sec;
-                            danjuCheckDataGridView.Rows[idx].Cells[5].Value = last_hour + ":" + last_min + ":" + last_sec;
+                            danjuCheckDataGridView["danjuGridView_시작시간", idx].Value = first_hour + ":" + first_min + ":" + first_sec;
+                            danjuCheckDataGridView["danjuGridView_종료시간", idx].Value = last_hour + ":" + last_min + ":" + last_sec;
 
-                            allDanjuCnt += conclusionDic.Key * danjuDic.Value.repeatCnt;
+                            allDanjuCnt += volume_danjucheck_dictionary.Key * danjuDic.Value.repeatCnt;
                             allTradeMoney += danjuDic.Value.sumConclusionQnt;
                             idx++;
                         }

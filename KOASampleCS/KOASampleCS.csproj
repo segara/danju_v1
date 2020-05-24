@@ -73,7 +73,7 @@
     <Compile Include="model\MonitorStockOdd.cs" />
     <Compile Include="model\SavedStockItem.cs" />
     <Compile Include="model\StockEventArgs.cs" />
-    <Compile Include="model\StockItemElement.cs" />
+    <Compile Include="model\StockItemElementMgr.cs" />
     <Compile Include="model\StockOddLotInfo.cs" />
     <Compile Include="model\TradeData.cs" />
     <Compile Include="Program.cs" />

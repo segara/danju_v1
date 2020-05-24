@@ -55,6 +55,7 @@ namespace sunsin.controller
                 {
                     return;
                 }
+
                 int conclusionTime = Int32.Parse(axKHOpenAPI.GetCommRealData(e.sRealType, 20));
                 double curPrice = double.Parse(axKHOpenAPI.GetCommRealData(e.sRealType, 10));
                 if(curPrice<0)
@@ -68,6 +69,7 @@ namespace sunsin.controller
                 int hour = conclusionTime / 10000;
                 int minutes = conclusionTime / 100 % 100;
                 int second = conclusionTime % 100;
+
                 int realTime = hour * 3600 + minutes * 60 + second;
 
                 if(allConclusionVolume >= VOLUME_UP_BUY || allConclusionVolume <= VOLUME_UP_SELL)
@@ -81,7 +83,6 @@ namespace sunsin.controller
                     myStockItem.myStockItemDic[e.sRealKey].curVolume = conclusionVolume;
                     myStockItem.myStockItemDic[e.sRealKey].gapPercentage = gapPercentage;
                     myStockItem.myStockItemDic[e.sRealKey].gapPrice = gapPrice;
-
                 }
                 else
                 {
